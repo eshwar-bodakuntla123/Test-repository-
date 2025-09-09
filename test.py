@@ -250,3 +250,51 @@ def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
 
     doc.build(story)
     print(f"✅ PDF generated: {filename}")
+
+
+
+import plotly.express as px
+import plotly.io as pio
+import base64
+import io
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+
+
+def create_pdf_with_images(title, img_bytes, output_file="test_plot.pdf"):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer)
+    story = []
+
+    styles = getSampleStyleSheet()
+    story.append(Paragraph(f"<b>{title}</b>", styles["Heading1"]))
+    story.append(Spacer(1, 0.2 * inch))
+
+    img_stream = io.BytesIO(base64.b64decode(img_bytes))
+    story.append(Image(img_stream, width=5 * inch, height=3 * inch))
+
+    doc.build(story)
+
+    # save PDF to file
+    with open(output_file, "wb") as f:
+        f.write(buffer.getvalue())
+
+    print(f"✅ PDF created: {output_file}")
+
+
+# --------------------------
+# MAIN TEST CODE
+# --------------------------
+
+# Create a simple Plotly chart
+fig = px.line(x=[1, 2, 3, 4], y=[10, 20, 10, 30], title="Test Plot")
+
+# ✅ Export as PNG using Kaleido (no Chrome needed)
+img_bytes = pio.to_image(fig, format="png", engine="kaleido")
+
+# Convert to Base64 for embedding
+img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+
+# Create PDF with the image
+create_pdf_with_images("My Test Image", img_base64, output_file="output_test.pdf")

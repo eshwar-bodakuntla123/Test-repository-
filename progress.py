@@ -7,7 +7,7 @@ from reportlab.lib.units import inch
 def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
     """
     Converts tagged AI output (<title>, <heading>, <subheading>, <paragraph>, 
-    <bullet>, <subbullet>, <image>) into a styled PDF with proper grouping.
+    <bullet>, <subbullet>, <image>) into a styled PDF with proper nested bullets.
     """
 
     doc = SimpleDocTemplate(filename, pagesize=letter,
@@ -64,18 +64,26 @@ def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
                 if btag == "bullet":
                     bullet_items.append(ListItem(Paragraph(bcontent, bullet_style)))
                 elif btag == "subbullet":
-                    bullet_items.append(ListItem(Paragraph(bcontent, subbullet_style)))
+                    # Nest subbullet inside its own ListFlowable for indentation
+                    sub_list = ListFlowable(
+                        [ListItem(Paragraph(bcontent, subbullet_style))],
+                        bulletType="bullet",
+                        start="–",
+                        leftIndent=20
+                    )
+                    bullet_items.append(sub_list)
                 i += 1
 
             # Create one grouped bullet list
-            story.append(ListFlowable(bullet_items, bulletType="bullet", start="•"))
+            story.append(ListFlowable(bullet_items, bulletType="bullet", start="•", leftIndent=0))
+            story.append(Spacer(1, 0.1 * inch))
             continue  # skip extra increment (already moved i)
 
         elif tag == "image":
             try:
                 story.append(Image(content, width=5*inch, height=3*inch))
                 story.append(Spacer(1, 0.2 * inch))
-            except Exception as e:
+            except Exception:
                 story.append(Paragraph(f"[Image not found: {content}]", paragraph_style))
 
         i += 1

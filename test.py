@@ -335,3 +335,34 @@ def generate_bar_chart(df, comparison_dimension):
         print("⚠️ Could not find the Insertion Order and/or Advertiser values in your data.")
         print(f"Invalid input. Details: {e}")
         return None
+
+
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+try:
+    # Create the bar plot with Seaborn
+    plt.figure(figsize=(10, 6))
+    ax = sns.barplot(
+        data=df,
+        x="COMPARISON_DIMENSION",  # replace with your actual column name
+        y="Unique Reach: Exclusive Total Reach",
+        palette="crest"
+    )
+
+    # Add labels and title
+    ax.set_title("COMPARISON_DIMENSION + Exclusive Reach", fontsize=14)
+    ax.set_xlabel("COMPARISON_DIMENSION", fontsize=12)
+    ax.set_ylabel("Unique Reach: Exclusive Total Reach", fontsize=12)
+    plt.xticks(rotation=45, ha="right")
+
+    # Show chart
+    plt.tight_layout()
+    plt.show()
+
+except KeyError as e:
+    # Handling missing column errors
+    print("⚠️ Could not find the Insertion Order and/or Advertiser values within those columns in your sheets")
+    print(f"Invalid input. Details: {e}")

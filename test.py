@@ -298,3 +298,40 @@ img_base64 = base64.b64encode(img_bytes).decode("utf-8")
 
 # Create PDF with the image
 create_pdf_with_images("My Test Image", img_base64, output_file="output_test.pdf")
+
+
+
+import matplotlib.pyplot as plt
+import io, base64
+
+def generate_bar_chart(df, comparison_dimension):
+    try:
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Create the bar chart
+        ax.bar(
+            df[comparison_dimension],
+            df["Unique Reach: Exclusive Total Reach"],
+            color="skyblue"
+        )
+
+        ax.set_title(comparison_dimension, fontsize=14)
+        ax.set_xlabel(comparison_dimension, fontsize=12)
+        ax.set_ylabel("Unique Reach: Exclusive Total Reach", fontsize=12)
+        plt.xticks(rotation=45, ha="right")
+
+        # Save to bytes
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight")
+        buf.seek(0)
+        img_bytes = buf.getvalue()
+        plt.close(fig)
+
+        # Convert to base64 for PDF embedding
+        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+        return img_base64
+
+    except KeyError as e:
+        print("⚠️ Could not find the Insertion Order and/or Advertiser values in your data.")
+        print(f"Invalid input. Details: {e}")
+        return None

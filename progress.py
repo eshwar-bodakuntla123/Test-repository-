@@ -1,92 +1,84 @@
-import re
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
+import io
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from matplotlib.patches import Patch
 
-def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
-    """
-    Converts tagged AI output (<title>, <heading>, <subheading>, <paragraph>, 
-    <bullet>, <subbullet>, <image>) into a styled PDF with proper nested bullets.
-    """
+# ---------- USER CONFIG ----------
+COMPARISON_DIMENSION = "your_category_col"   # categorical col
+VALUE_COL = "Unique Reach: Duplicate Total Reach"
+BAR_CHARTS_WIDTH_IN_PIXELS = 1200
+BAR_CHARTS_HEIGHT_IN_PIXELS = 800
+dpi = 100
+# ----------------------------------
 
-    doc = SimpleDocTemplate(filename, pagesize=letter,
-                            rightMargin=40, leftMargin=40,
-                            topMargin=60, bottomMargin=40)
+# Example dataframe (remove when you have df)
+# df = pd.DataFrame({
+#     "your_category_col": ["Very Long Campaign A", "Very Long Campaign B", "Very Long Campaign C"],
+#     "Unique Reach: Duplicate Total Reach": [123, 456, 78]
+# })
 
-    styles = getSampleStyleSheet()
+# keep insertion order
+unique_categories = list(pd.Series(df[COMPARISON_DIMENSION]).drop_duplicates())
+mapping = {cat: f"IO{idx+1}" for idx, cat in enumerate(unique_categories)}
 
-    # Custom styles
-    title_style = ParagraphStyle("TitleStyle", parent=styles["Title"], fontSize=18, spaceAfter=12)
-    heading_style = ParagraphStyle("HeadingStyle", parent=styles["Heading2"], fontSize=14,
-                                   spaceBefore=14, spaceAfter=6, leading=16)
-    subheading_style = ParagraphStyle("SubheadingStyle", parent=styles["Heading3"], fontSize=12,
-                                      spaceBefore=10, spaceAfter=4, leading=14)
-    paragraph_style = ParagraphStyle("ParagraphStyle", parent=styles["Normal"], fontSize=11,
-                                     leading=14, spaceAfter=8)
-    bullet_style = ParagraphStyle("BulletStyle", parent=styles["Normal"], fontSize=11,
-                                  leftIndent=20, bulletIndent=10, spaceAfter=4)
-    subbullet_style = ParagraphStyle("SubBulletStyle", parent=styles["Normal"], fontSize=11,
-                                     leftIndent=40, bulletIndent=30, spaceAfter=3)
+# add IO label
+df["IO_label"] = df[COMPARISON_DIMENSION].map(mapping)
 
-    story = []
+# aggregate values per category
+aggregated = df.groupby(["IO_label", COMPARISON_DIMENSION], sort=False)[VALUE_COL].sum().reset_index()
 
-    # Parse tags
-    tokens = re.findall(r"<(.*?)>(.*?)</\1>", text_output, re.DOTALL)
+# pixel → inch
+fig_w = BAR_CHARTS_WIDTH_IN_PIXELS / dpi
+fig_h = BAR_CHARTS_HEIGHT_IN_PIXELS / dpi
 
-    i = 0
-    while i < len(tokens):
-        tag, content = tokens[i]
-        content = content.strip()
+fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
 
-        if tag == "title":
-            story.append(Paragraph(content, title_style))
-            story.append(Spacer(1, 0.2 * inch))
+# horizontal barplot
+sns.barplot(
+    data=aggregated,
+    x=VALUE_COL,
+    y="IO_label",
+    orient="h",
+    ax=ax,
+    color="#4285F4"
+)
 
-        elif tag == "heading":
-            story.append(Paragraph(f"<b>{content}</b>", heading_style))
-            story.append(Spacer(1, 0.1 * inch))
+ax.set_title(f"{COMPARISON_DIMENSION} — Duplicate Reach", fontsize=16)
+ax.set_xlabel("Unique Reach: Duplicate Total Reach", fontsize=12)
+ax.set_ylabel("Insertion Orders", fontsize=12)
 
-        elif tag == "subheading":
-            story.append(Paragraph(f"<b>{content}</b>", subheading_style))
-            story.append(Spacer(1, 0.05 * inch))
+# add value labels at bar end
+for p in ax.patches:
+    width = p.get_width()
+    ax.annotate(f"{int(width):,}" if float(width).is_integer() else f"{width:.2f}",
+                (width, p.get_y() + p.get_height() / 2),
+                xytext=(5, 0),
+                textcoords="offset points",
+                va="center",
+                fontsize=10)
 
-        elif tag == "paragraph":
-            story.append(Paragraph(content, paragraph_style))
+# --------- CUSTOM LEGEND ---------
+# create legend handles (IO → Original)
+handles = []
+for io_label, original in zip(aggregated["IO_label"], aggregated[COMPARISON_DIMENSION]):
+    handles.append(Patch(color="#4285F4", label=f"{io_label} → {original}"))
 
-        elif tag == "bullet":
-            # Collect all consecutive bullets & subbullets
-            bullet_items = []
-            while i < len(tokens) and tokens[i][0] in ["bullet", "subbullet"]:
-                btag, bcontent = tokens[i]
-                bcontent = bcontent.strip()
+# place legend outside
+ax.legend(
+    handles=handles,
+    title="Mapping (IO → Original)",
+    loc="center left",
+    bbox_to_anchor=(1.02, 0.5),
+    fontsize=9,
+    title_fontsize=10,
+    frameon=False
+)
 
-                if btag == "bullet":
-                    bullet_items.append(ListItem(Paragraph(bcontent, bullet_style)))
-                elif btag == "subbullet":
-                    # Nest subbullet inside its own ListFlowable for indentation
-                    sub_list = ListFlowable(
-                        [ListItem(Paragraph(bcontent, subbullet_style))],
-                        bulletType="bullet",
-                        start="–",
-                        leftIndent=20
-                    )
-                    bullet_items.append(sub_list)
-                i += 1
+plt.tight_layout(rect=[0, 0, 0.75, 1])  # leave space for legend
 
-            # Create one grouped bullet list
-            story.append(ListFlowable(bullet_items, bulletType="bullet", start="•", leftIndent=0))
-            story.append(Spacer(1, 0.1 * inch))
-            continue  # skip extra increment (already moved i)
+buf = io.BytesIO()
+plt.savefig(buf, format="png", dpi=dpi, bbox_inches="tight")
+buf.seek(0)
 
-        elif tag == "image":
-            try:
-                story.append(Image(content, width=5*inch, height=3*inch))
-                story.append(Spacer(1, 0.2 * inch))
-            except Exception:
-                story.append(Paragraph(f"[Image not found: {content}]", paragraph_style))
-
-        i += 1
-
-    doc.build(story)
-    print(f"✅ PDF generated: {filename}")
+print(f"bar chart ready with legend: {len(mapping)} IO mappings")

@@ -1,368 +1,126 @@
-print("this is sample python code")
-
-
-Got it ✅ — we’ll extend the system so your AI output can include:
-
-Title
-
-Headings (main sections)
-
-Subheadings (nested sections under a heading)
-
-Paragraphs (intro or explanations)
-
-Bullets (lists of insights)
-
-Sub-bullets (nested under a bullet)
-
-Images (optional, if you want charts in PDF later)
-
-
-By using tags, everything stays clean, parseable, and PDF-friendly.
-
-
----
-
-🔹 Updated sys_instruct (Tag-Based Formatting)
-
-sys_instruct = f"""
-You are a highly experienced DV360 Specialist. You specialize in crafting and optimizing programmatic advertising strategies that directly drive incremental sales. You have a deep understanding of the digital advertising landscape.
-
-Expertise: Advanced knowledge of programmatic advertising, DV360 platform, audience targeting, campaign optimization, and data analysis. Proven ability to drive incremental sales and demonstrate ROI.
-
-Keep in mind when preparing insights that reach cannot be summed. High Overlap (Duplicate Reach) is good for building frequency, whereas Low Overlap (Exclusive Reach) is good for building reach.
-
-Tone: Be assertive and confident but approachable and conversational. Use clear, concise language. Avoid jargon and keep paragraphs short.
-
-📄 PDF Formatting Rules with Tags:
-- Wrap the **Title** in <title> ... </title>.
-- Wrap the **Introduction** in <paragraph> ... </paragraph>.
-- For each **Heading**, wrap in <heading> ... </heading>.
-- For each **Subheading**, wrap in <subheading> ... </subheading>.
-- For each **Bullet point**, wrap in <bullet> ... </bullet>.
-- For **Nested bullet points**, wrap in <subbullet> ... </subbullet>.
-- For body text, always use <paragraph> ... </paragraph>.
-- For charts or images, use <image>path_or_url</image>.
-- Keep output plain text with these tags only. No markdown, no extra symbols.
-
-When prompt starts with "--", refine the text provided using the above rules and tags.
-"""
-
-
----
-
-🔹 Example AI Output
-
-<title>DV360 Reach Overlap Analysis</title>
-
-<paragraph>This report evaluates overlap and exclusive reach performance to guide smarter budget allocation. The goal is to maximize incremental audience growth while balancing frequency.</paragraph>
-
-<heading>Key Findings and Recommendations:</heading>
-<bullet>IO_1 and IO_3 show high overlap, supporting efficient frequency-building.</bullet>
-<bullet>IO_5 demonstrates strong exclusive reach, ideal for incremental reach.</bullet>
-<bullet>Reallocate budget to IO_5 while sustaining IO_1 + IO_3 for reinforcement.</bullet>
-
-<subheading>Audience Insights:</subheading>
-<bullet>Overlap is highest among younger demographics.</bullet>
-<subbullet>IO_2 reaches 65% of the same audience as IO_3.</subbullet>
-<subbullet>This reduces efficiency for incremental reach.</subbullet>
-
-<heading>Budget Efficiency:</heading>
-<bullet>CPM for IO_5 is 20% lower than average, improving cost per unique user.</bullet>
-<bullet>IO_2 has high CPM and high overlap, reducing efficiency. Recommend budget pullback.</bullet>
-
-<heading>Next Steps:</heading>
-<bullet>Double down on IOs with high exclusive reach and strong CPM efficiency.</bullet>
-<bullet>Maintain frequency-heavy IOs at reduced budget to balance reach and frequency.</bullet>
-<image>filtered_ios_heatmap.png</image>
-
-
----
-
-🔹 PDF Export Function (Handles All Tags)
-
-import re
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-
-def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
-    """
-    Converts tagged AI output (<title>, <heading>, <subheading>, <paragraph>, 
-    <bullet>, <subbullet>, <image>) into a styled PDF.
-    """
-
-    doc = SimpleDocTemplate(filename, pagesize=letter,
-                            rightMargin=40, leftMargin=40,
-                            topMargin=60, bottomMargin=40)
-
-    styles = getSampleStyleSheet()
-
-    # Custom styles
-    title_style = ParagraphStyle("TitleStyle", parent=styles["Title"], fontSize=18, spaceAfter=12)
-    heading_style = ParagraphStyle("HeadingStyle", parent=styles["Heading2"], fontSize=14,
-                                   spaceBefore=14, spaceAfter=6, leading=16)
-    subheading_style = ParagraphStyle("SubheadingStyle", parent=styles["Heading3"], fontSize=12,
-                                      spaceBefore=10, spaceAfter=4, leading=14)
-    paragraph_style = ParagraphStyle("ParagraphStyle", parent=styles["Normal"], fontSize=11,
-                                     leading=14, spaceAfter=8)
-    bullet_style = ParagraphStyle("BulletStyle", parent=styles["Normal"], fontSize=11,
-                                  leftIndent=20, bulletIndent=10, spaceAfter=4)
-    subbullet_style = ParagraphStyle("SubBulletStyle", parent=styles["Normal"], fontSize=11,
-                                     leftIndent=40, bulletIndent=30, spaceAfter=3)
-
-    story = []
-
-    # Regex parsing
-    for tag, content in re.findall(r"<(.*?)>(.*?)</\1>", text_output, re.DOTALL):
-        content = content.strip()
-
-        if tag == "title":
-            story.append(Paragraph(content, title_style))
-            story.append(Spacer(1, 0.2 * inch))
-
-        elif tag == "heading":
-            story.append(Paragraph(f"<b>{content}</b>", heading_style))
-            story.append(Spacer(1, 0.1 * inch))
-
-        elif tag == "subheading":
-            story.append(Paragraph(f"<b>{content}</b>", subheading_style))
-            story.append(Spacer(1, 0.05 * inch))
-
-        elif tag == "paragraph":
-            story.append(Paragraph(content, paragraph_style))
-
-        elif tag == "bullet":
-            bullet = ListItem(Paragraph(content, bullet_style))
-            story.append(ListFlowable([bullet], bulletType="bullet", start="•"))
-
-        elif tag == "subbullet":
-            bullet = ListItem(Paragraph(content, subbullet_style))
-            story.append(ListFlowable([bullet], bulletType="bullet", start="–"))
-
-        elif tag == "image":
-            try:
-                story.append(Image(content, width=5*inch, height=3*inch))
-                story.append(Spacer(1, 0.2 * inch))
-            except Exception as e:
-                story.append(Paragraph(f"[Image not found: {content}]", paragraph_style))
-
-    doc.build(story)
-    print(f"✅ PDF generated: {filename}")
-
-
----
-
-✅ This setup gives you full control:
-
-<title> → big centered title.
-
-<heading> → bold section header.
-
-<subheading> → smaller bold header.
-
-<paragraph> → normal text.
-
-<bullet> → bullet list.
-
-<subbullet> → nested bullet list.
-
-<image> → insert heatmap or chart automatically.
-
-
-
----
-
-Would you like me to also add automatic page breaks (e.g., when a new <heading> starts) so long reports don’t look too crowded?
-
-
-
-
-
-
-import re
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-
-def export_tagged_to_pdf(text_output, filename="DV360_Full_Report.pdf"):
-    """
-    Converts tagged AI output (<title>, <heading>, <subheading>, <paragraph>, 
-    <bullet>, <subbullet>, <image>) into a styled PDF.
-    """
-
-    doc = SimpleDocTemplate(filename, pagesize=letter,
-                            rightMargin=40, leftMargin=40,
-                            topMargin=60, bottomMargin=40)
-
-    styles = getSampleStyleSheet()
-
-    # Custom styles
-    title_style = ParagraphStyle("TitleStyle", parent=styles["Title"], fontSize=18, spaceAfter=12)
-    heading_style = ParagraphStyle("HeadingStyle", parent=styles["Heading2"], fontSize=14,
-                                   spaceBefore=14, spaceAfter=6, leading=16)
-    subheading_style = ParagraphStyle("SubheadingStyle", parent=styles["Heading3"], fontSize=12,
-                                      spaceBefore=10, spaceAfter=4, leading=14)
-    paragraph_style = ParagraphStyle("ParagraphStyle", parent=styles["Normal"], fontSize=11,
-                                     leading=14, spaceAfter=8)
-    bullet_style = ParagraphStyle("BulletStyle", parent=styles["Normal"], fontSize=11,
-                                  leftIndent=20, bulletIndent=10, spaceAfter=4)
-    subbullet_style = ParagraphStyle("SubBulletStyle", parent=styles["Normal"], fontSize=11,
-                                     leftIndent=40, bulletIndent=30, spaceAfter=3)
-
-    story = []
-
-    # Regex parsing
-    for tag, content in re.findall(r"<(.*?)>(.*?)</\1>", text_output, re.DOTALL):
-        content = content.strip()
-
-        if tag == "title":
-            story.append(Paragraph(content, title_style))
-            story.append(Spacer(1, 0.2 * inch))
-
-        elif tag == "heading":
-            story.append(Paragraph(f"<b>{content}</b>", heading_style))
-            story.append(Spacer(1, 0.1 * inch))
-
-        elif tag == "subheading":
-            story.append(Paragraph(f"<b>{content}</b>", subheading_style))
-            story.append(Spacer(1, 0.05 * inch))
-
-        elif tag == "paragraph":
-            story.append(Paragraph(content, paragraph_style))
-
-        elif tag == "bullet":
-            bullet = ListItem(Paragraph(content, bullet_style))
-            story.append(ListFlowable([bullet], bulletType="bullet", start="•"))
-
-        elif tag == "subbullet":
-            bullet = ListItem(Paragraph(content, subbullet_style))
-            story.append(ListFlowable([bullet], bulletType="bullet", start="–"))
-
-        elif tag == "image":
-            try:
-                story.append(Image(content, width=5*inch, height=3*inch))
-                story.append(Spacer(1, 0.2 * inch))
-            except Exception as e:
-                story.append(Paragraph(f"[Image not found: {content}]", paragraph_style))
-
-    doc.build(story)
-    print(f"✅ PDF generated: {filename}")
-
-
-
-import plotly.express as px
-import plotly.io as pio
-import base64
-import io
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
-
-
-def create_pdf_with_images(title, img_bytes, output_file="test_plot.pdf"):
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer)
-    story = []
-
-    styles = getSampleStyleSheet()
-    story.append(Paragraph(f"<b>{title}</b>", styles["Heading1"]))
-    story.append(Spacer(1, 0.2 * inch))
-
-    img_stream = io.BytesIO(base64.b64decode(img_bytes))
-    story.append(Image(img_stream, width=5 * inch, height=3 * inch))
-
-    doc.build(story)
-
-    # save PDF to file
-    with open(output_file, "wb") as f:
-        f.write(buffer.getvalue())
-
-    print(f"✅ PDF created: {output_file}")
-
-
-# --------------------------
-# MAIN TEST CODE
-# --------------------------
-
-# Create a simple Plotly chart
-fig = px.line(x=[1, 2, 3, 4], y=[10, 20, 10, 30], title="Test Plot")
-
-# ✅ Export as PNG using Kaleido (no Chrome needed)
-img_bytes = pio.to_image(fig, format="png", engine="kaleido")
-
-# Convert to Base64 for embedding
-img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-
-# Create PDF with the image
-create_pdf_with_images("My Test Image", img_base64, output_file="output_test.pdf")
-
-
-
 import matplotlib.pyplot as plt
-import io, base64
+import seaborn as sns
+import matplotlib.ticker as mtick
+import math
+import textwrap
 
-def generate_bar_chart(df, comparison_dimension):
+def plot_overlap_heatmap(overlap_heatmap_df,
+                         ALL_IOS_HEATMAP_SIZE='Medium',
+                         COMPARISON_DIMENSION='Comparison',
+                         mapping_dict=None,   # optional: {original_name: "IO1", ...} or { "IO1": original_name }
+                         dpi=100):
+    """
+    overlap_heatmap_df : square DataFrame with values in 0..1 (fractions representing % overlap)
+    ALL_IOS_HEATMAP_SIZE : 'Small'|'Medium'|'Large' controlling base figsize
+    mapping_dict : optional dict to display mapping legend below the heatmap
+    """
     try:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        # Assume overlap_heatmap_df is already cleaned by overlap_col_cleaner
+        cleaned_df = overlap_heatmap_df.copy()
 
-        # Create the bar chart
-        ax.bar(
-            df[comparison_dimension],
-            df["Unique Reach: Exclusive Total Reach"],
-            color="skyblue"
+        # Choose figsize based on size selection (in inches)
+        if ALL_IOS_HEATMAP_SIZE == 'Small':
+            fig_w, fig_h = 10, 5
+        elif ALL_IOS_HEATMAP_SIZE == 'Medium':
+            fig_w, fig_h = 20, 10
+        else:
+            fig_w, fig_h = 30, 20
+
+        # If there are many rows, increase height to avoid cramped labels (optional)
+        n = cleaned_df.shape[0]
+        # add a small per-row height bump so each row has at least ~0.25 inch
+        extra_h = max(0, (n - 20) * 0.25)
+        fig_h = fig_h + extra_h
+
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
+
+        # Plot heatmap. Assume values are fractions 0..1; annot shows percent with 0 decimals
+        sns.heatmap(
+            cleaned_df,
+            cmap="Greens",
+            annot=True,
+            fmt=".0%",            # show annotations as percentages
+            cbar=True,
+            ax=ax,
+            linewidths=0.5,
+            linecolor="white",
+            square=False
         )
 
-        ax.set_title(comparison_dimension, fontsize=14)
-        ax.set_xlabel(comparison_dimension, fontsize=12)
-        ax.set_ylabel("Unique Reach: Exclusive Total Reach", fontsize=12)
-        plt.xticks(rotation=45, ha="right")
+        # Colorbar (legend) formatting: show ticks as percentages
+        cbar = ax.collections[0].colorbar
+        cbar.formatter = mtick.PercentFormatter(xmax=1.0, decimals=0)
+        cbar.update_ticks()
+        cbar.ax.tick_params(labelsize=10)
 
-        # Save to bytes
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight")
-        buf.seek(0)
-        img_bytes = buf.getvalue()
-        plt.close(fig)
+        # Titles and axis labels + font sizes
+        ax.set_title("DV360 Reach Overlap Heatmap\n", fontsize=18, pad=14)
+        ax.set_xlabel(COMPARISON_DIMENSION, fontsize=14)
+        ax.set_ylabel(COMPARISON_DIMENSION, fontsize=14)
 
-        # Convert to base64 for PDF embedding
-        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-        return img_base64
+        # Ticks fontsize and rotation
+        ax.tick_params(axis='y', labelsize=9)
+        ax.tick_params(axis='x', labelsize=9)
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")  # rotate x labels for readability
 
-    except KeyError as e:
-        print("⚠️ Could not find the Insertion Order and/or Advertiser values in your data.")
+        plt.tight_layout(rect=[0, 0.12, 1, 0.98])  # leave room at bottom for mapping legend
+
+        # ---- Optional: mapping legend below the chart ----
+        # mapping_dict expected either {original_name: "IO1"} or {"IO1": original_name}
+        if mapping_dict:
+            # Normalize mapping to IO -> original_name
+            # detect which side looks like IOs (IO\d+). If keys look like IOs, flip.
+            first_key = next(iter(mapping_dict))
+            if str(first_key).upper().startswith("IO") or any(str(k).upper().startswith("IO") for k in mapping_dict.keys()):
+                io_to_original = {k: v for k, v in mapping_dict.items()}
+            else:
+                io_to_original = {v: k for k, v in mapping_dict.items()}  # flip original->IO to IO->original
+
+            # Build mapping lines
+            mapping_lines = [f"{io} → {textwrap.shorten(orig, width=80)}" for io, orig in io_to_original.items()]
+
+            # Auto-split into columns based on number of items
+            def split_to_columns(lines, max_cols=6, approx_per_col=10):
+                n = len(lines)
+                # Choose cols so rows per column ~ approx_per_col
+                ncols = min(max_cols, max(1, math.ceil(n / approx_per_col)))
+                rows = math.ceil(n / ncols)
+                cols = []
+                for c in range(ncols):
+                    start = c * rows
+                    cols.append(lines[start:start + rows])
+                # pad
+                maxrows = max(len(c) for c in cols)
+                for c in cols:
+                    while len(c) < maxrows:
+                        c.append("")
+                rows_combined = []
+                for r in range(maxrows):
+                    row = "    ".join(col[r].ljust(60) for col in cols)
+                    rows_combined.append(row)
+                return "\n".join(rows_combined)
+
+            # If many items, split into columns; otherwise single column
+            if len(mapping_lines) > 12:
+                mapping_text = split_to_columns(mapping_lines, max_cols=6, approx_per_col=12)
+            else:
+                mapping_text = "\n".join(mapping_lines)
+
+            # Add as figure text centered below chart
+            fig.text(0.5, 0.02, mapping_text, ha='center', va='bottom', fontsize=10, family='monospace')
+
+        plt.show()
+
+    except NameError as e:
+        print('Could not find the Reach Overlap % data within your sheet')
         print(f"Invalid input. Details: {e}")
-        return None
+    except Exception as e:
+        # generic catch so you get helpful feedback
+        print("Failed to create heatmap. Details:", e)
 
 
-
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-try:
-    # Create the bar plot with Seaborn
-    plt.figure(figsize=(10, 6))
-    ax = sns.barplot(
-        data=df,
-        x="COMPARISON_DIMENSION",  # replace with your actual column name
-        y="Unique Reach: Exclusive Total Reach",
-        palette="crest"
-    )
-
-    # Add labels and title
-    ax.set_title("COMPARISON_DIMENSION + Exclusive Reach", fontsize=14)
-    ax.set_xlabel("COMPARISON_DIMENSION", fontsize=12)
-    ax.set_ylabel("Unique Reach: Exclusive Total Reach", fontsize=12)
-    plt.xticks(rotation=45, ha="right")
-
-    # Show chart
-    plt.tight_layout()
-    plt.show()
-
-except KeyError as e:
-    # Handling missing column errors
-    print("⚠️ Could not find the Insertion Order and/or Advertiser values within those columns in your sheets")
-    print(f"Invalid input. Details: {e}")
+# --------------------------
+# Example usage:
+# cleaned = overlap_col_cleaner(overlap_heatmap_df)  # as you had
+# mapping_example = {"Very long campaign name A": "IO1", "Very long campaign name B": "IO2"}
+# plot_overlap_heatmap(cleaned, ALL_IOS_HEATMAP_SIZE='Medium', COMPARISON_DIMENSION='Campaign', mapping_dict=mapping_example)

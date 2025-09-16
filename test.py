@@ -1,185 +1,162 @@
-import os
-import io
-import base64
-import math
-import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
-from matplotlib.patches import Patch
-from matplotlib.backends.backend_pdf import PdfPages
-import seaborn as sns
+# Requires: reportlab, pillow
+# Install if needed: pip install reportlab pillow
 
-def export_io_barplot_pdf(
-    df,
-    COMPARISON_DIMENSION="Insertion Order",
-    VALUE_COL="Unique Reach: Exclusive Total Reach",
-    BAR_CHARTS_WIDTH_IN_PIXELS=1400,
-    HEIGHT_PER_CATEGORY_PX=40,
-    MIN_HEIGHT_PX=600,
-    dpi_pdf=300,                # DPI used when saving raster (PNG) and for the PDF save
-    out_pdf="bar_plot_vector.pdf",
-    out_png="bar_plot_highres.png",
-    annotation_fontsize=18,
-    tick_label_fs=14,
-    axis_label_fs=16,
-    title_fs=20,
-    legend_fs=12,
-    legend_title_fs=14,
-    font_family_list=None
+import os
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.units import inch, cm
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+from textwrap import wrap
+from PIL import Image
+
+def create_report_with_image_and_text(
+    image_path,
+    out_pdf_report="final_report.pdf",
+    title="DV360 Duplicate Reach Report",
+    subtitle=None,
+    paragraphs=None,
+    mapping_dict=None,
+    page_size=A4,
+    image_max_width_ratio=0.9,   # fraction of page width
+    image_max_height_ratio=0.5,  # fraction of page height for image area
+    margin_cm=2
 ):
     """
-    Create high-quality barplot and export both a vector PDF (best when embedding in reports)
-    and a high-res PNG fallback.
-
-    Returns (mapping_dict, out_pdf, out_png, base64_png)
+    Create a PDF report that places the chart image on the first page and
+    adds textual analysis and mapping on subsequent space (same page or next page)
+    - image_path: path to the high-res PNG exported earlier
+    - paragraphs: list of strings (analysis text) to include
+    - mapping_dict: dictionary original->IO or IO->original (function will normalize)
     """
-    # ----------------- professional defaults -----------------
-    if font_family_list is None:
-        # list: first item will be used if installed; DejaVu Sans always available
-        font_family_list = ["Arial", "DejaVu Sans"]
 
-    # Make fonts embed-friendly for PDF
-    mpl.rcParams['pdf.fonttype'] = 42   # TrueType (embed fonts)
-    mpl.rcParams['ps.fonttype'] = 42
-    mpl.rcParams['font.family'] = 'sans-serif'
-    mpl.rcParams['font.sans-serif'] = font_family_list
+    # Prepare text
+    if paragraphs is None:
+        paragraphs = [
+            "Analysis summarizes duplicate reach across several DV360 insertion orders.",
+            "Key findings: Insertion orders differ substantially in duplicate reach; consider budget reallocation toward IOs with lower duplication to expand unique reach."
+        ]
 
-    # Validate inputs
-    if COMPARISON_DIMENSION not in df.columns:
-        raise KeyError(f"Column '{COMPARISON_DIMENSION}' not found in DataFrame")
-    if VALUE_COL not in df.columns:
-        raise KeyError(f"Column '{VALUE_COL}' not found in DataFrame")
-
-    # Work on a copy
-    data = df.copy()
-
-    # Ensure numeric
-    data[VALUE_COL] = pd.to_numeric(data[VALUE_COL], errors="coerce")
-
-    # Build mapping preserving insertion order
-    unique_categories = list(pd.Series(data[COMPARISON_DIMENSION]).drop_duplicates())
-    mapping = {orig: f"IO{idx+1}" for idx, orig in enumerate(unique_categories)}
-
-    # Map and aggregate
-    data["IO_label"] = data[COMPARISON_DIMENSION].map(mapping)
-    aggregated = (
-        data.groupby(["IO_label", COMPARISON_DIMENSION], sort=False)[VALUE_COL]
-            .sum()
-            .reset_index()
-    )
-
-    # Figure size in inches (fixed width; dynamic height per category)
-    width_px = BAR_CHARTS_WIDTH_IN_PIXELS
-    n_categories = max(1, aggregated.shape[0])
-    height_px = max(MIN_HEIGHT_PX, n_categories * HEIGHT_PER_CATEGORY_PX)
-
-    fig_w = width_px / dpi_pdf
-    fig_h = height_px / dpi_pdf
-
-    # Create figure
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi_pdf)
-
-    # Horizontal barplot so IO labels remain short
-    sns.barplot(
-        data=aggregated,
-        x=VALUE_COL,
-        y="IO_label",
-        orient="h",
-        ax=ax,
-        color="#4285F4",
-        linewidth=0
-    )
-
-    # Titles and axis labels
-    ax.set_title(f"{COMPARISON_DIMENSION} — Exclusive Reach", fontsize=title_fs, family=font_family_list[0])
-    ax.set_xlabel(VALUE_COL, fontsize=axis_label_fs, family=font_family_list[0])
-    ax.set_ylabel("Insertion Orders (IO)", fontsize=axis_label_fs, family=font_family_list[0])
-
-    # Ticks
-    ax.tick_params(axis="x", labelsize=tick_label_fs)
-    ax.tick_params(axis="y", labelsize=tick_label_fs)
-    # avoid scientific notation, show integers with commas
-    ax.xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
-    ax.ticklabel_format(style="plain", axis="x")
-
-    # Annotate bar-end values (big, bold, white background so they are always readable)
-    for p in ax.patches:
-        width = p.get_width()
-        if pd.isna(width):
-            label_text = ""
+    # Normalize mapping: create IO -> original mapping
+    io_to_original = {}
+    if mapping_dict:
+        # detect format
+        first_key = next(iter(mapping_dict))
+        if str(first_key).upper().startswith("IO") or any(str(k).upper().startswith("IO") for k in mapping_dict.keys()):
+            # mapping given as IO->original
+            io_to_original = {str(k): str(v) for k, v in mapping_dict.items()}
         else:
-            # integer formatting if no fractional part
-            label_text = f"{int(width):,}" if float(width).is_integer() else f"{width:,.2f}"
-        ax.annotate(
-            label_text,
-            xy=(width, p.get_y() + p.get_height() / 2),
-            xytext=(8, 0),
-            textcoords="offset points",
-            va="center",
-            fontsize=annotation_fontsize,
-            fontweight="bold",
-            family=font_family_list[0],
-            color="black",
-            bbox=dict(boxstyle="round,pad=0.18", fc="white", ec="none", alpha=0.9)
-        )
+            # mapping given as original->IO, flip
+            io_to_original = {v: k for k, v in mapping_dict.items()}
 
-    # Build IO -> original legend handles (preserve IO order from aggregated)
-    # Use aggregated to preserve the insertion order of IOs
-    seen = set()
-    handles = []
-    for io in aggregated["IO_label"]:
-        if io in seen:
-            continue
-        seen.add(io)
-        orig = aggregated.loc[aggregated["IO_label"] == io, COMPARISON_DIMENSION].iloc[0]
-        short_orig = str(orig) if len(str(orig)) <= 90 else str(orig)[:87] + "..."
-        handles.append(Patch(facecolor="#4285F4", label=f"{io} → {short_orig}"))
+    # Create canvas
+    c = canvas.Canvas(out_pdf_report, pagesize=page_size)
+    page_w, page_h = page_size
 
-    # Auto ncol selection so legend doesn't become a single tall column
-    n_items = len(handles)
-    if n_items <= 10:
-        ncol = 2
-    elif n_items <= 20:
-        ncol = 3
-    elif n_items <= 40:
-        ncol = 4
-    else:
-        ncol = 6
+    # Margins in points
+    margin = margin_cm * cm
 
-    # Place legend centered below the chart
-    ax.legend(
-        handles=handles,
-        title="Mapping (IO → Original)",
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.12),
-        fontsize=legend_fs,
-        title_fontsize=legend_title_fs,
-        ncol=ncol,
-        frameon=False
-    )
+    # Draw title
+    title_font = "Helvetica-Bold"
+    c.setFont(title_font, 18)
+    c.drawString(margin, page_h - margin - 10, title)
+    if subtitle:
+        c.setFont("Helvetica", 12)
+        c.drawString(margin, page_h - margin - 30, subtitle)
 
-    # Leave space for legend
-    plt.tight_layout(rect=[0, 0.06, 1, 1])
+    # Load image and compute size to fit
+    img = Image.open(image_path)
+    img_w_px, img_h_px = img.size
 
-    # ---------------- Save: vector PDF (best) ----------------
-    # Use PdfPages to ensure a single-page PDF at the exact figure size; fonts are embedded via rcParams
-    with PdfPages(out_pdf) as pdf:
-        pdf.savefig(fig, bbox_inches="tight", pad_inches=0.1, dpi=dpi_pdf)
+    # Determine image area
+    max_img_w = page_w * image_max_width_ratio - 2 * margin
+    max_img_h = page_h * image_max_height_ratio - 2 * margin
 
-    # ---------------- Save: very high-res PNG fallback ----------------
-    # Many corporate tools rasterize on paste; provide a very-high-res PNG (600 DPI or more)
-    fig.savefig(out_png, dpi=600, bbox_inches="tight", pad_inches=0.1)
+    # Convert image pixels to points assuming image DPI (if unknown, assume 300 DPI)
+    img_dpi = img.info.get("dpi", (300, 300))[0]
+    img_w_pts = img_w_px / img_dpi * inch
+    img_h_pts = img_h_px / img_dpi * inch
 
-    # Get PNG base64 if you need to embed programmatically
-    with open(out_png, "rb") as f:
-        img_bytes = f.read()
-    img_b64 = base64.b64encode(img_bytes).decode("ascii")
+    # Scale to fit inside max area while keeping aspect ratio
+    scale = min(max_img_w / img_w_pts, max_img_h / img_h_pts, 1.0)
+    draw_w = img_w_pts * scale
+    draw_h = img_h_pts * scale
 
-    plt.close(fig)
+    # Place image centered horizontally below title
+    img_x = (page_w - draw_w) / 2
+    img_y = page_h - margin - 60 - draw_h  # leave space for title
 
-    return mapping, out_pdf, out_png, img_b64
+    c.drawImage(ImageReader(img), img_x, img_y, width=draw_w, height=draw_h, preserveAspectRatio=True)
 
-# ---------------- Example usage ----------------
-# mapping, pdf_path, png_path, png_b64 = export_io_barplot_pdf(df)
-# print("Saved:", pdf_path, png_path)
+    # Text area below image
+    text_x = margin
+    text_y = img_y - 20  # start below image
+    available_w = page_w - 2 * margin
+
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(text_x, text_y, "Summary & Recommendations")
+    text_y -= 16
+
+    # Draw paragraphs wrapped
+    c.setFont("Helvetica", 10)
+    for para in paragraphs:
+        # wrap to available_w (approx chars per line)
+        # compute approx chars per line: assume 6.5 pts per character at 10pt -> chars = available_w / 6.5
+        approx_chars = max(40, int(available_w / 6.5))
+        lines = wrap(para, approx_chars)
+        for line in lines:
+            if text_y < margin + 60:
+                # new page if no space
+                c.showPage()
+                text_y = page_h - margin
+                c.setFont("Helvetica", 10)
+            c.drawString(text_x, text_y, line)
+            text_y -= 14
+        text_y -= 8  # paragraph gap
+
+    # If mapping provided, add mapping section (may go to next page if not enough room)
+    if io_to_original:
+        if text_y < margin + 120:
+            c.showPage()
+            text_y = page_h - margin
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(text_x, text_y, "IO → Original Mapping (sample)")
+        text_y -= 16
+        c.setFont("Helvetica", 9)
+        # Print mapping in columns for compactness: 3 columns
+        items = list(io_to_original.items())
+        cols = 3
+        rows = math.ceil(len(items) / cols)
+        col_w = available_w / cols
+        for r in range(rows):
+            for col in range(cols):
+                idx = r + col * rows
+                if idx >= len(items):
+                    continue
+                io, orig = items[idx]
+                short_orig = orig if len(orig) <= 60 else orig[:57] + "..."
+                x_pos = text_x + col * col_w
+                if text_y < margin + 40:
+                    c.showPage()
+                    text_y = page_h - margin
+                c.drawString(x_pos, text_y, f"{io} → {short_orig}")
+            text_y -= 12
+
+    # finalize
+    c.save()
+    return out_pdf_report
+
+# ---------------- USAGE EXAMPLE ----------------
+# 1) Create chart files using export_io_barplot_pdf (from previous code)
+# mapping, chart_pdf, chart_png, png_b64 = export_io_barplot_pdf(df)
+
+# 2) Provide analytical paragraphs and produce final PDF
+# paragraphs = [
+#     "Overall Reach and Frequency: The data reveals significant variations in duplicate reach across different insertion orders, indicating a mix of strategies focusing on reach versus frequency.",
+#     "Recommendation: Reallocate budget away from insertion orders with high duplicate reach and invest in those showing lower duplication to expand the unique audience."
+# ]
+# final_pdf = create_report_with_image_and_text(chart_png, out_pdf_report="dv360_report.pdf",
+#                                               title="DV360 Duplicate Reach Analysis",
+#                                               subtitle="Generated on 2025-09-16",
+#                                               paragraphs=paragraphs,
+#                                               mapping_dict=mapping)
+# print("Saved report:", final_pdf)

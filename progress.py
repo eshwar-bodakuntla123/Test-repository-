@@ -1,84 +1,77 @@
-import io
-import matplotlib.pyplot as plt
-import seaborn as sns
+import re
 import pandas as pd
-from matplotlib.patches import Patch
 
-# ---------- USER CONFIG ----------
-COMPARISON_DIMENSION = "your_category_col"   # categorical col
-VALUE_COL = "Unique Reach: Duplicate Total Reach"
-dpi = 100
-BAR_CHARTS_WIDTH_IN_PIXELS = 1200   # fixed width
-HEIGHT_PER_CATEGORY = 40            # pixels per IO row
-MIN_HEIGHT_PIXELS = 600             # minimum height
-# ----------------------------------
+def _norm(x):
+    if pd.isna(x):
+        return ""
+    s = str(x)
+    # normalize odd whitespace & punctuation variants
+    s = s.replace("\u00A0", " ")  # NBSP -> space
+    s = s.replace("–", "-").replace("—", "-")  # en/em dashes -> hyphen
+    s = s.strip()
+    # drop leading line numbers like "6 Date Range:"
+    s = re.sub(r"^\s*\d+\s+", "", s)
+    return s
 
-# Example df (remove when you already have it)
-# df = pd.DataFrame({
-#     "your_category_col": [f"Campaign {i}" for i in range(1, 25)],
-#     "Unique Reach: Duplicate Total Reach": [i*10 for i in range(1, 25)]
-# })
+def _find_first_cell(df, predicate):
+    """Return (row, col) of first cell meeting predicate, else (None, None)."""
+    for r in range(df.shape[0]):
+        for c in range(df.shape[1]):
+            val = _norm(df.iat[r, c])
+            if predicate(val):
+                return r, c
+    return None, None
 
-# create IO mapping
-unique_categories = list(pd.Series(df[COMPARISON_DIMENSION]).drop_duplicates())
-mapping = {cat: f"IO{idx+1}" for idx, cat in enumerate(unique_categories)}
-df["IO_label"] = df[COMPARISON_DIMENSION].map(mapping)
+def _parse_dates_from_text(text):
+    # Accept YYYY/MM/DD or YYYY-MM-DD around 'to' with optional spaces
+    m = re.search(r"(\d{4}[-/]\d{2}[-/]\d{2})\s*to\s*(\d{4}[-/]\d{2}[-/]\d{2})", text, flags=re.I)
+    if not m:
+        return None, None, None
+    start_s, end_s = m.group(1), m.group(2)
+    start = pd.to_datetime(start_s, errors="coerce")
+    end   = pd.to_datetime(end_s, errors="coerce")
+    return start, end, f"{start_s} to {end_s}"
 
-# aggregate
-aggregated = df.groupby(["IO_label", COMPARISON_DIMENSION], sort=False)[VALUE_COL].sum().reset_index()
+def extract_date_range(df_all: pd.DataFrame):
+    """
+    Robustly extract (start_ts, end_ts, raw_str) for 'Date Range:' from a messy DataFrame.
+    Returns (None, None, None) if not found.
+    """
+    # 1) Try cell-wise: find the cell that contains 'Date Range'
+    r, c = _find_first_cell(df_all, lambda s: s.lower().startswith("date range"))
+    if r is not None:
+        # Gather the rest of the row to the right, joined with spaces
+        right_cells = " ".join(_norm(df_all.iat[r, k]) for k in range(c, df_all.shape[1]))
+        # If the label and value are split, try also cells after the label
+        # Example: ["Date Range:", "2025/08/01 to 2025/08/28"]
+        start, end, raw = _parse_dates_from_text(right_cells)
+        if start is not None:
+            return start, end, raw
 
-# ----- FIXED WIDTH, DYNAMIC HEIGHT -----
-n_categories = aggregated.shape[0]
-height_px = max(MIN_HEIGHT_PIXELS, n_categories * HEIGHT_PER_CATEGORY)
-fig_w = BAR_CHARTS_WIDTH_IN_PIXELS / dpi
-fig_h = height_px / dpi
+    # 2) Fallback: join each entire row and search
+    row_text = (
+        df_all.applymap(_norm)
+              .apply(lambda s: " ".join([x for x in s if x]), axis=1)
+    )
+    for txt in row_text:
+        if "date range" in txt.lower():
+            start, end, raw = _parse_dates_from_text(txt)
+            if start is not None:
+                return start, end, raw
 
-fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
+    # 3) Last resort: scan all cells and parse any dates around 'to'
+    all_cells = " ".join(df_all.applymap(_norm).stack().tolist())
+    start, end, raw = _parse_dates_from_text(all_cells)
+    if start is not None:
+        return start, end, raw
 
-# plot
-sns.barplot(
-    data=aggregated,
-    x=VALUE_COL,
-    y="IO_label",
-    orient="h",
-    ax=ax,
-    color="#4285F4"
-)
+    return None, None, None
 
-ax.set_title(f"{COMPARISON_DIMENSION} — Duplicate Reach", fontsize=16)
-ax.set_xlabel("Unique Reach: Duplicate Total Reach", fontsize=12)
-ax.set_ylabel("Insertion Orders", fontsize=12)
+# ---------- Example usage ----------
+# Read your file as a raw grid (no header) to retain the metadata rows
+# df_all = pd.read_csv("sample1.csv", header=None, dtype=str, engine="python", on_bad_lines="skip")
 
-# bar values
-for p in ax.patches:
-    width = p.get_width()
-    ax.annotate(f"{int(width):,}" if float(width).is_integer() else f"{width:.2f}",
-                (width, p.get_y() + p.get_height() / 2),
-                xytext=(5, 0),
-                textcoords="offset points",
-                va="center",
-                fontsize=10)
-
-# legend below
-handles = []
-for io_label, original in zip(aggregated["IO_label"], aggregated[COMPARISON_DIMENSION]):
-    handles.append(Patch(color="#4285F4", label=f"{io_label} → {original}"))
-
-ax.legend(
-    handles=handles,
-    title="Mapping (IO → Original)",
-    loc="upper center",
-    bbox_to_anchor=(0.5, -0.1),
-    fontsize=9,
-    title_fontsize=10,
-    ncol=4,  # adjust depending on number of IOs
-    frameon=False
-)
-
-plt.tight_layout(rect=[0, 0.1, 1, 1])  # leave space at bottom
-
-buf = io.BytesIO()
-plt.savefig(buf, format="png", dpi=dpi, bbox_inches="tight")
-buf.seek(0)
-
-print(f"Chart ready: {n_categories} IOs, height {height_px}px, fixed width {BAR_CHARTS_WIDTH_IN_PIXELS}px")
+# start_ts, end_ts, raw = extract_date_range(df_all)
+# print("Raw Date Range:", raw)
+# print("Start:", start_ts)
+# print("End:", end_ts)

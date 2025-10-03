@@ -1,53 +1,7 @@
-Dark sky, thunder rolls.
+On a vast battlefield under a blood-red sky, arrows rain down like fire. In the foreground on the left side, Lord Rama stands firm on a rocky mound, facing right. His body is steady, feet apart, bow drawn back with a glowing divine arrow. A bolt of lightning flashes behind him, illuminating his calm but fierce expression.
 
-Slow zoom: exiled Rama walking with bow, Sita by his side, Lakshmana carrying a torch, Hanuman flying above with his mace glowing.
+In the far right background, King Ravana stands tall, facing left, directly opposite Rama. His armored body gleams, his ten heads roar in fury, full beard and demonic face clear. His golden chariot lies shattered behind him in flames, smoke curling into the sky.
 
-Background: faint temple bells.
+Rama releases the arrow in slow motion — the divine shaft glows gold, cutting across the battlefield from left to right, leaving a trail of light that pierces the darkness. The arrow strikes Ravana in the chest; his massive body jerks back, his weapons fall, his heads scream and fade. Ravana stumbles backwards into an empty, dark background, collapsing like a fallen giant, symbolizing the end of evil.
 
-On screen text (golden glow): “Fourteen years of exile…”
-
-
-
----
-
-Second Shot (9–16 sec)
-
-Epic battlefield — arrows rain like fire, Ravana’s chariot shatters.
-
-Rama pulls back his bow, lightning illuminates his face.
-
-In slow motion, the divine arrow pierces darkness — Ravana falls.
-
-Crowd of vanaras and warriors roar in victory.
-
-On screen text: “The triumph of dharma.”
-
-
-
----
-
-Third Shot (17–24 sec)
-
-Ayodhya city shown in breathtaking scale — river Sarayu glowing with floating diyas, rooftops sparkling with lamps.
-
-Citizens light thousands of diyas in perfect rhythm, turning the whole city into a golden ocean.
-
-Camera rises above, showing the palace bathed in endless light.
-
-On screen text: “The return of their King.”
-
-
-
----
-
-Final Shot (25–32 sec)
-
-Children’s faces glow in the reflection of diya flames.
-
-Families embrace, fireworks bloom in slow motion.
-
-Rama, Sita, Lakshmana, and Hanuman appear as divine silhouettes in the sky, blessing Ayodhya.
-
-On screen text (majestic, radiant):
-“✨ This is Diwali – Light over Darkness. ✨”
-
+The camera holds steady on Rama in the left foreground — standing tall, lowering his bow with dignity, divine aura radiating around him. Behind Rama, Lakshmana, Hanuman, and the vanara army erupt in a victorious roar, weapons raised to the sky. Conch shells and temple bells echo as the scene ends with Rama standing unshaken, Ravana lying fallen in the distance

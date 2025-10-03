@@ -1,20 +1,53 @@
-Clip 1 (0–8 sec) – Return of Rama
-"Wide shot of Ayodhya city bathed in darkness, awaiting its king. The camera slowly tilts upward to reveal thousands of lamps being lit as Lord Rama, Sita, and Lakshmana enter on a golden chariot. Faces of people glow in awe as the night transforms into light — symbolizing victory of dharma over adharma."
+Dark sky, thunder rolls.
 
+Slow zoom: exiled Rama walking with bow, Sita by his side, Lakshmana carrying a torch, Hanuman flying above with his mace glowing.
 
----
+Background: faint temple bells.
 
-Clip 2 (8–16 sec) – Goddess Lakshmi’s Elevation
-"Transition to a divine cosmic ocean, where a lotus blooms in radiant golden light. Goddess Lakshmi rises gracefully, adorned in red silk and jewels, showering wealth and fortune. The scene dissolves into temples and homes where devotees light diyas in her honor, believing her blessings bring prosperity."
+On screen text (golden glow): “Fourteen years of exile…”
 
-
----
-
-Clip 3 (16–24 sec) – Naraka Chaturdashi Legend
-"A dramatic battlefield illuminated by lightning: Lord Krishna, radiant with Sudarshana Chakra, defeats the demon Narakasura. As the evil collapses, the dark skies burst into color and joy. Cut to villagers lighting diyas to mark the end of darkness and tyranny, their celebrations echoing through ages."
 
 
 ---
 
-Clip 4 (24–32 sec) – The Eternal Festival of Lights
-"Grand aerial sweep of India lit with countless diyas across rivers, palaces, and villages. Overlay of all divine forms — Rama’s return, Lakshmi’s grace, Krishna’s triumph — merging into one radiant light. The frame slowly zooms out to show the earth shining like a jewel in space. Text fades in: ‘Dilwai — the victory of light, truth, and divinity.’"
+Second Shot (9–16 sec)
+
+Epic battlefield — arrows rain like fire, Ravana’s chariot shatters.
+
+Rama pulls back his bow, lightning illuminates his face.
+
+In slow motion, the divine arrow pierces darkness — Ravana falls.
+
+Crowd of vanaras and warriors roar in victory.
+
+On screen text: “The triumph of dharma.”
+
+
+
+---
+
+Third Shot (17–24 sec)
+
+Ayodhya city shown in breathtaking scale — river Sarayu glowing with floating diyas, rooftops sparkling with lamps.
+
+Citizens light thousands of diyas in perfect rhythm, turning the whole city into a golden ocean.
+
+Camera rises above, showing the palace bathed in endless light.
+
+On screen text: “The return of their King.”
+
+
+
+---
+
+Final Shot (25–32 sec)
+
+Children’s faces glow in the reflection of diya flames.
+
+Families embrace, fireworks bloom in slow motion.
+
+Rama, Sita, Lakshmana, and Hanuman appear as divine silhouettes in the sky, blessing Ayodhya.
+
+On screen text (majestic, radiant):
+“✨ This is Diwali – Light over Darkness. ✨”
+

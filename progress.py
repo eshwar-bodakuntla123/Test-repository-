@@ -1,16 +1,15 @@
-Mid-shot of the battlefield, dynamic angle capturing both Lord Rama on the left and Rāvaṇa on the right, approximately 15–20 meters apart. Rama stands poised, bow fully drawn, arrow glowing with soft golden light. His robe and hair flutter in the wind; eyes fixed intently on his target. Rāvaṇa, ten heads towering, stands on jagged rock, raising his massive, ornate golden mace defensively, each face showing a different emotion—rage, cunning, determination.
+“Aerial sweeping shot over the battlefield, slowly rotating to capture Lord Rama on the left and Rāvaṇa on the right, both facing each other, standing firmly in heroic poses. Rama’s bow is still drawn, arrow glowing faintly, his posture calm yet powerful, eyes unwavering, radiating focus and courage. Rāvaṇa stands tall on jagged rock, ten heads showing different expressions—rage, determination, and cunning—as he braces defensively, massive golden mace held ready.
 
-The arrow arcs slowly in the air, glowing with mystical energy, creating a subtle trail of light behind it. Dust, debris, and embers swirl violently around their feet, reacting to the intensity of the movement. Fires from distant parts of the battlefield cast flickering orange reflections on Rāvaṇa’s armor and on Rama’s bow.
+The battlefield around them is shrouded in swirling dust and mist, with embers from distant fires drifting through the air. Lightning briefly illuminates the sky, casting dramatic shadows and highlighting the intricate details of Rāvaṇa’s armor and Rama’s golden bow.
 
-Cinematic camera effect: Slow-motion arrow flight, slight rotation around both characters to highlight their scale and heroism. Background shows the war-torn battlefield shrouded in mist and scattered fire embers, emphasizing depth and chaos. Atmosphere charged with anticipation, tension, and the energy of two legendary warriors about to collide.
+Cinematic camera effect: Slow aerial zoom-in circling the characters, emphasizing their heroic scale and the tension of the moment. The camera captures the contrast between Rama’s composed determination and Rāvaṇa’s imposing power, while the swirling mist, sparks, and environmental motion add grandeur and cinematic depth.
 
 Focus on:
 
-Rama’s calm yet intense focus, arrow glowing.
+Both characters’ heroic postures, showing anticipation and power.
 
-Rāvaṇa’s towering presence, ten heads showing distinct emotions.
+Environmental effects: dust, mist, embers, and lightning.
 
-Swirling dust, embers, and subtle environmental motion to enhance drama.
+Dramatic lighting emphasizing textures and facial expressions.
 
-Safe, epic, cinematic style with no graphic violence, just heroic clash anticipation.”
-
+Safe, epic cinematic tension, no graphic violence, just anticipation of the legendary clash.”

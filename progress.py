@@ -1,7 +1,7 @@
-“On a grand battlefield beneath a glowing red sky, arrows streak across the air like fire. In the foreground to the left, Lord Rama stands tall on a rocky mound, facing right. His bow is drawn with a radiant divine arrow, lightning illuminating his calm but resolute face.
+“On a vast mythical stage beneath a glowing red-golden sky, Lord Rama stands on the left side, radiant, holding a shining bow of light. His calm face glows with determination as a divine arrow made of pure energy forms in his hands.
 
-On the right side, mighty Ravana stands opposite, armored, his many heads roaring in defiance. Behind him, his golden chariot glimmers in broken fragments, flames flickering in the distance.
+On the right side, majestic Ravana appears, towering with his many heads, his form shimmering with shadows. His broken golden chariot glimmers behind him, surrounded by flickering firelight.
 
-Rama releases the divine arrow in slow motion — the glowing light travels across the battlefield, filling the scene with brilliance. As it reaches Ravana, the screen floods with golden light, and Ravana’s form begins to fade into the brightness, symbolizing the fall of darkness.
+Rama releases the arrow of light — it travels across the sky, transforming the battlefield into brilliance. Ravana’s figure slowly dissolves into the golden radiance, as if darkness itself is melting away.
 
-The light clears, and Rama remains standing firm in the left foreground, lowering his bow with dignity. Behind him, Lakshmana, Hanuman, and the vanara army lift their weapons high, cheering in victory. The camera pulls back to reveal Rama glowing with divine aura, Ravana’s shadow dissolving in the distance, while conch shells and temple bells echo.
+The light clears to reveal Rama glowing with a divine aura, standing strong as Hanuman, Lakshmana, and the vanara army cheer joyfully behind him. The scene ends with the sky filled with lamps and fireworks, symbolizing the triumph of light over darkness.”

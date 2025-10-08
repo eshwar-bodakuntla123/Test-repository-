@@ -1,15 +1,80 @@
-“Aerial sweeping shot over the battlefield, slowly rotating to capture Lord Rama on the left and Rāvaṇa on the right, both facing each other, standing firmly in heroic poses. Rama’s bow is still drawn, arrow glowing faintly, his posture calm yet powerful, eyes unwavering, radiating focus and courage. Rāvaṇa stands tall on jagged rock, ten heads showing different expressions—rage, determination, and cunning—as he braces defensively, massive golden mace held ready.
+🧠 1. Wait for Training Completion
 
-The battlefield around them is shrouded in swirling dust and mist, with embers from distant fires drifting through the air. Lightning briefly illuminates the sky, casting dramatic shadows and highlighting the intricate details of Rāvaṇa’s armor and Rama’s golden bow.
+The algorithm must finish its training phase (usually 24–48 hours).
 
-Cinematic camera effect: Slow aerial zoom-in circling the characters, emphasizing their heroic scale and the tension of the moment. The camera captures the contrast between Rama’s composed determination and Rāvaṇa’s imposing power, while the swirling mist, sparks, and environmental motion add grandeur and cinematic depth.
+During this time, it learns patterns from historical data and impressions to predict value scores.
 
-Focus on:
 
-Both characters’ heroic postures, showing anticipation and power.
+✅ Tip: Ensure your training data has enough volume (impressions/conversions) for better model performance.
 
-Environmental effects: dust, mist, embers, and lightning.
 
-Dramatic lighting emphasizing textures and facial expressions.
+---
 
-Safe, epic cinematic tension, no graphic violence, just anticipation of the legendary clash.”
+📌 2. Assign the Custom Bidding Algorithm
+
+Once training is complete:
+
+Go to Insertion Orders (IOs) or Line Items in DV360.
+
+Select the Bidding Strategy section.
+
+Choose Custom Bidding and pick your trained algorithm from the list.
+
+Set any required floor CPM or bid caps as per your campaign strategy.
+
+
+👉 This ensures your campaigns start bidding using your custom logic rather than standard automated strategies.
+
+
+---
+
+🧪 3. (Optional but Recommended) Set Up an Experiment
+
+Create an A/B experiment to compare performance:
+
+Group A: Uses the custom bidding algorithm.
+
+Group B: Uses your current standard bidding.
+
+
+Define success metrics (e.g., CPA, ROAS, conversions, viewability, attention score, etc.).
+
+Run the experiment for at least 2–4 weeks to get statistically meaningful results.
+
+
+✅ Why it matters: Helps validate the performance of your algorithm before scaling.
+
+
+---
+
+📊 4. Monitor Performance Closely
+
+Use the Bidding Overview and Custom Bidding Scorecard.
+
+Track:
+
+Impressions won
+
+Conversion lift
+
+eCPM and CPA changes
+
+Any anomalies or under-delivery.
+
+
+
+
+---
+
+📚 5. Optimize if Needed
+
+If performance is below expectations:
+
+Check signal weightings or features in the script.
+
+Add more historical data.
+
+Retrain or adjust model parameters.
+
+
+

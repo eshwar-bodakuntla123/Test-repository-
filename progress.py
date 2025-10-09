@@ -1,80 +1,85 @@
-🧠 1. Wait for Training Completion
+KPI: Custom impression value / cost
+Algorithm: forge_test (1568810)
+[  0  ]   ← editable box beside algorithm
 
-The algorithm must finish its training phase (usually 24–48 hours).
+🧠 Here’s what each part means:
 
-During this time, it learns patterns from historical data and impressions to predict value scores.
+Custom impression value / cost → This is the objective/KPI your algorithm is optimizing for.
 
+forge_test (1568810) → This is your custom bidding algorithm name.
 
-✅ Tip: Ensure your training data has enough volume (impressions/conversions) for better model performance.
-
-
----
-
-📌 2. Assign the Custom Bidding Algorithm
-
-Once training is complete:
-
-Go to Insertion Orders (IOs) or Line Items in DV360.
-
-Select the Bidding Strategy section.
-
-Choose Custom Bidding and pick your trained algorithm from the list.
-
-Set any required floor CPM or bid caps as per your campaign strategy.
-
-
-👉 This ensures your campaigns start bidding using your custom logic rather than standard automated strategies.
-
-
----
-
-🧪 3. (Optional but Recommended) Set Up an Experiment
-
-Create an A/B experiment to compare performance:
-
-Group A: Uses the custom bidding algorithm.
-
-Group B: Uses your current standard bidding.
-
-
-Define success metrics (e.g., CPA, ROAS, conversions, viewability, attention score, etc.).
-
-Run the experiment for at least 2–4 weeks to get statistically meaningful results.
-
-
-✅ Why it matters: Helps validate the performance of your algorithm before scaling.
-
-
----
-
-📊 4. Monitor Performance Closely
-
-Use the Bidding Overview and Custom Bidding Scorecard.
-
-Track:
-
-Impressions won
-
-Conversion lift
-
-eCPM and CPA changes
-
-Any anomalies or under-delivery.
-
+0 in the editable box → This is your target value or goal for the KPI.
+DV360 uses this number to understand what value per cost you’re aiming for.
 
 
 
 ---
 
-📚 5. Optimize if Needed
+💡 How this target number works:
 
-If performance is below expectations:
+For Custom impression value / cost, DV360 interprets it like this:
 
-Check signal weightings or features in the script.
+You’ve defined a “value” per impression inside your script (e.g. score like 0–500 or actual dollar value).
 
-Add more historical data.
+This box is where you tell DV360:
 
-Retrain or adjust model parameters.
+> “I want to maximize Value / Cost above this target.”
 
 
+
+
+👉 If you leave it at 0:
+
+The system will try to maximize total value per cost, but without a strict threshold.
+
+Good for early testing / training phase.
+
+
+👉 If you set a target (e.g. 300 or a dollar value depending on your scoring method):
+
+DV360 will prioritize impressions that push performance toward or above that threshold.
+
+Essentially it says: “Only aggressively bid if the algorithm score/value helps me reach my goal.”
+
+
+
+---
+
+📊 Practical example:
+
+Let’s say your custom bidding algorithm returns:
+
+0 = low value
+
+500 = high value
+
+
+If you:
+
+Set target = 0 → it tries to maximize total value, bidding proportionally to scores.
+
+Set target = 200 → it focuses more on impressions with score ≥ 200
+
+Set target = 400 → it becomes stricter, bidding mainly on top-quality impressions
+
+
+✅ Tip: Most advertisers start with 0 during training so the algorithm can explore impressions.
+Once it stabilizes (after 1–2 weeks and meets minimum impression requirements), they increase the target to fine-tune performance.
+
+
+---
+
+🧭 Recommended steps for your case:
+
+1. ✅ Keep KPI = Custom impression value / cost
+
+
+2. ✅ Select your algorithm forge_test (1568810)
+
+
+3. ✏️ In the box, enter:
+
+0 if this is a new algorithm still collecting training data
+
+Or a target score (e.g. 200–300) if it’s already trained and you want to focus on high-quality impressions
 

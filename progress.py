@@ -1,85 +1,155 @@
-KPI: Custom impression value / cost
-Algorithm: forge_test (1568810)
-[  0  ]   ← editable box beside algorithm
+An A/B test for Custom Bidding in Google Display & Video 360 (DV360) is a structured way to measure the real impact of your custom bidding algorithm (e.g., an “Attention-based” strategy) against your current or baseline bidding.
 
-🧠 Here’s what each part means:
+Here’s a clear breakdown of what this test involves 👇
 
-Custom impression value / cost → This is the objective/KPI your algorithm is optimizing for.
 
-forge_test (1568810) → This is your custom bidding algorithm name.
+---
 
-0 in the editable box → This is your target value or goal for the KPI.
-DV360 uses this number to understand what value per cost you’re aiming for.
+🧪 Goal of the A/B Test
+
+To compare performance between:
+
+A: Your new Custom Bidding (CB) algorithm (e.g., Attention-based)
+
+B: Your Original bidding strategy (e.g., manual CPM, tCPA, or tROAS)
+
+
+This helps determine if the custom algorithm truly drives better performance on your chosen KPI (e.g., attention score, conversions, cost efficiency, engagement).
+
+
+---
+
+🧭 Step-by-Step A/B Testing Framework
+
+1. Launch Custom Bidding Algorithm
+
+Train and deploy your Attention-based custom bidding algorithm.
+
+Ensure it’s fully trained and eligible for use (no errors, sufficient signals).
+
+Don’t assign it to your existing IO yet — create a new test IO.
 
 
 
 ---
 
-💡 How this target number works:
+2. Set Up Experiment
 
-For Custom impression value / cost, DV360 interprets it like this:
+Create two identical insertion orders (IOs):
 
-You’ve defined a “value” per impression inside your script (e.g. score like 0–500 or actual dollar value).
+IO	Bidding	Purpose
 
-This box is where you tell DV360:
-
-> “I want to maximize Value / Cost above this target.”
-
+IO A	Custom Bidding	Test
+IO B	Original strategy (e.g., fixed bid/manual)	Control
 
 
+✅ Both should have:
 
-👉 If you leave it at 0:
+Same budget split (e.g., 50/50 or as recommended)
 
-The system will try to maximize total value per cost, but without a strict threshold.
+Same targeting (geo, inventory, audience, frequency caps)
 
-Good for early testing / training phase.
+Same creatives (or equivalent)
 
 
-👉 If you set a target (e.g. 300 or a dollar value depending on your scoring method):
+❌ No extra audiences or special targeting in one vs. the other.
 
-DV360 will prioritize impressions that push performance toward or above that threshold.
 
-Essentially it says: “Only aggressively bid if the algorithm score/value helps me reach my goal.”
+---
+
+3. Run for 3–4 Weeks (Minimum)
+
+Recommended minimum flight duration: 3–4 weeks for stable data.
+
+Run both IOs in parallel to eliminate seasonality or external factors.
+
+Limit optimization activity:
+
+❌ Do not make major changes to the Custom Bidding IO during the test.
+
+✅ You can decrease the addressable inventory in the Original IO (e.g., exclude poor-performing sites).
+
+❌ Do not add new inventory to the Original IO.
+
+
+
+This ensures clean, comparable results.
+
+
+---
+
+4. Optimization Guidelines
+
+Original IO: Optimize normally as you would (bid adjustments, exclusions).
+
+Custom Bidding IO: Let the algorithm learn and optimize on its own.
+
+Don’t introduce new signals or campaigns mid-test.
+
+Limit changes to flight dates, targeting, or creatives.
 
 
 
 ---
 
-📊 Practical example:
+5. Evaluate Performance
 
-Let’s say your custom bidding algorithm returns:
+At the end of the flight:
 
-0 = low value
+Metric	Custom Bidding IO	Original IO	Result
 
-500 = high value
-
-
-If you:
-
-Set target = 0 → it tries to maximize total value, bidding proportionally to scores.
-
-Set target = 200 → it focuses more on impressions with score ≥ 200
-
-Set target = 400 → it becomes stricter, bidding mainly on top-quality impressions
+Impressions	📊	📊	
+CPM / CPC	📊	📊	
+Attention / KPI Score	📊	📊	
+Conversions / CPA	📊	📊	
 
 
-✅ Tip: Most advertisers start with 0 during training so the algorithm can explore impressions.
-Once it stabilizes (after 1–2 weeks and meets minimum impression requirements), they increase the target to fine-tune performance.
+Focus on your primary KPI (e.g., attention score, cost efficiency, conversions).
+
+Also check secondary metrics (viewability, CTR, CPM, CPC, spend pacing).
+
+Use DV360’s experiment reporting or a custom dashboard (e.g., Looker Studio or BigQuery exports).
+
 
 
 ---
 
-🧭 Recommended steps for your case:
+6. Decision Making
 
-1. ✅ Keep KPI = Custom impression value / cost
+After reviewing results:
+
+🟢 If Custom Bidding performs better → scale it to more IOs or entire campaigns.
+
+🟡 If results are neutral → consider extending the test or adjusting the signal weights.
+
+🔴 If underperforming → analyze signals, flight settings, and algorithm quality.
 
 
-2. ✅ Select your algorithm forge_test (1568810)
+> Google’s guidance: “Use your discretion on a case-by-case basis for analyzing results and extending flights.”
 
 
-3. ✏️ In the box, enter:
 
-0 if this is a new algorithm still collecting training data
 
-Or a target score (e.g. 200–300) if it’s already trained and you want to focus on high-quality impressions
+---
+
+📝 Pro Tips
+
+Run only one A/B test at a time for clean results.
+
+Avoid overlapping audiences or placements between the two IOs.
+
+Use clear naming conventions for IOs (e.g., Test_Attention_CB vs. Control_Manual).
+
+Document any changes made during the test period.
+
+Export impression and conversion logs for deeper analysis if needed.
+
+
+
+---
+
+✅ Summary:
+An A/B test for Custom Bidding in DV360 compares algorithm-driven optimization vs. manual or standard bidding in a controlled, parallel setup. Keep the Custom Bidding IO stable, let it learn, and measure against a control to make a data-backed scaling decision.
+
+Would you like me to give you a practical example of setting up such a test with real targeting/budget structure (e.g., video or display campaign)?
 

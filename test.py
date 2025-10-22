@@ -1,106 +1,66 @@
-Perfect ⚡
-Here’s a goosebumps-worthy 4-scene breakdown — each designed to fit ~8 seconds so you can generate them one by one and then stitch together into an epic short video of Shiva’s power.
+import subprocess
+import datetime
+import pandas as pd
 
+# 1️⃣ Load your list of customer IDs
+customer_ids = [308676862, 123456789, 987654321]
 
----
+# 2️⃣ Check which IDs you have access to (optional pre-check)
+# If you have a BigQuery or PLX table with valid access, filter here
+def filter_valid_customers(ids):
+    # Example placeholder — replace with actual access-check logic
+    valid_ids = []
+    for cid in ids:
+        # Here you could call a lightweight PLX query or API check
+        try:
+            subprocess.run(
+                ["plxquery", f"SELECT Customer.customer_id WHERE Customer.customer_id = {cid} FORMAT 'tangle';"],
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            valid_ids.append(cid)
+        except subprocess.CalledProcessError:
+            print(f"❌ No access to customer {cid}, skipping.")
+    return valid_ids
 
-🕉️ Scene 1 — “The Storm Awakens” (0–8 sec)
+valid_ids = filter_valid_customers(customer_ids)
 
-🎧 SFX: Distant thunder, howling wind, faint “Om Namah Shivaya” chants
+# 3️⃣ Generate your PLX script dynamically
+start_date = (datetime.date.today() - datetime.timedelta(days=90)).strftime("%Y%m%d")
+end_date = datetime.date.today().strftime("%Y%m%d")
 
-Dark clouds swirl over snow-covered Himalayan peaks.
+plx_script = f"""
+SET queryrequest.accounting_group = 'toolsmarketplace-prod-cns-storage-owner';
+SET fl_instance = '/fl/query/prod';
+SET queryrequest.num_workers = 3000;
 
-Mist rolls down the mountain like a living creature.
+DEFINE TABLE Campaigns (
+  FORMAT 'tangle',
+  QUERY FORMAT ('''
+    SELECT
+      Customer.external_customer_id AS external_customer_id,
+      Customer.currency_code AS currency_code,
+      Customer.customer_id AS internal_customer_id,
+      clicks,
+      impressions,
+      conversions,
+      conversion_value,
+      DayV2.day AS Day,
+      cost,
+      cost_usd
+    WHERE
+      DayV2.day >= {start_date}
+      AND DayV2.day <= {end_date}
+  '''),
+  ROOTIDS PROTOS = [{', '.join(f"'customer_id: {cid}'" for cid in valid_ids)}]
+);
+"""
 
-Lightning cracks — revealing a silhouette of Shiva seated in deep meditation.
+# 4️⃣ Run PLX script via CLI
+with open("daily_campaigns.plx", "w") as f:
+    f.write(plx_script)
 
-A serpent slowly slithers from the shadows toward him.
+subprocess.run(["plxrun", "daily_campaigns.plx"], check=True)
 
-Shiva’s eyes snap open, glowing with blue cosmic fire.
-
-The wind freezes — silence hits like a wave.
-
-
-🗣️ Voice-over (whisper to thunder):
-
-> “When silence screams… the destroyer awakens.”
-
-
-
-
----
-
-🐍 Scene 2 — “The Serpent’s Crown” (8–16 sec)
-
-🎧 SFX: Slow heartbeat drum, low chanting builds
-
-Close-up shot: the serpent coils around Shiva’s neck.
-
-The crescent moon on his head begins to glow brighter.
-
-His third eye flickers — sparks fly into the air.
-
-A gust of wind pushes outward as his hair begins to rise slowly.
-
-Blue light pulses around his body like a heartbeat of the cosmos.
-
-
-🗣️ Voice-over:
-
-> “The serpent bows… the cosmos listens.”
-
-
-
-
----
-
-🐂 Scene 3 — “Nandi Emerges” (16–24 sec)
-
-🎧 SFX: Deep drum beats, thunder rolls, footsteps
-
-From the fog, a massive bull — Nandi — emerges, each step shaking the earth.
-
-Shiva slowly rises from his seated posture, Trishul materializing in his hand.
-
-Nandi kneels before him.
-
-A beam of light breaks through the storm, lighting Shiva like a god descending.
-
-
-🗣️ Voice-over (intense):
-
-> “Even the storm pauses… to witness his power.”
-
-
-
-
----
-
-⚡ Scene 4 — “Mahadev Rises” (24–32 sec)
-
-🎧 SFX: Silence → thunder → massive energy blast + conch shell
-
-Shiva slams the Trishul into the ground with a thunderous boom.
-
-A glowing ring of blue fire spreads through the sky.
-
-Lightning wraps around Shiva’s body like divine armor.
-
-Nandi roars, mountains echo.
-
-Shiva stands tall, snake raised, Trishul shining — a god in full power.
-
-
-🗣️ Voice-over (roaring):
-
-> “This is not destruction… This is Mahadev!”
-
-
-
-🕉️ Text On Screen: “HAR HAR MAHADEV”
-
-
----
-
-Would you like me to rewrite this in Telugu for your final voice-over? (It will sound more divine and powerful 🔥)
-
+print("✅ Daily Tangle job executed successfully!")

@@ -1,66 +1,79 @@
 import subprocess
-import datetime
-import pandas as pd
+import os
 
-# 1️⃣ Load your list of customer IDs
-customer_ids = [308676862, 123456789, 987654321]
+def test_customer_access(customer_id):
+    """
+    Tests if the current user can access a given customer_id in PLX.
+    Returns True if access is valid, False otherwise.
+    """
 
-# 2️⃣ Check which IDs you have access to (optional pre-check)
-# If you have a BigQuery or PLX table with valid access, filter here
-def filter_valid_customers(ids):
-    # Example placeholder — replace with actual access-check logic
+    # Create a temporary PLX script dynamically
+    temp_script = f"/tmp/check_access_{customer_id}.plx"
+
+    plx_query = f"""
+    SET queryrequest.accounting_group = 'toolsmarketplace-prod-cns-storage-owner';
+
+    DEFINE TABLE CheckAccess (
+      FORMAT 'tangle',
+      QUERY FORMAT ('''
+        SELECT Customer.customer_id
+      '''),
+      ROOTIDS_PROTOS = ['customer_id: {customer_id}']
+    );
+    """
+
+    # Write to temp file
+    with open(temp_script, "w") as f:
+        f.write(plx_query)
+
+    # Run the PLX query
+    result = subprocess.run(
+        ["plxquery", "--file", temp_script],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False
+    )
+
+    # Detect access failure
+    if "AUTH_ERROR_USER_CANNOT_ACCESS_CUSTOMER" in result.stderr:
+        print(f"❌ Access denied for customer_id: {customer_id}")
+        return False
+    elif result.returncode == 0:
+        print(f"✅ Access OK for customer_id: {customer_id}")
+        return True
+    else:
+        print(f"⚠️ Unexpected error for {customer_id}: {result.stderr}")
+        return False
+
+
+def main():
+    customer_ids = [
+        "308676862",
+        "123456789",
+        "987654321",
+    ]
+
     valid_ids = []
-    for cid in ids:
-        # Here you could call a lightweight PLX query or API check
-        try:
-            subprocess.run(
-                ["plxquery", f"SELECT Customer.customer_id WHERE Customer.customer_id = {cid} FORMAT 'tangle';"],
-                check=True,
-                capture_output=True,
-                text=True
-            )
+    invalid_ids = []
+
+    for cid in customer_ids:
+        if test_customer_access(cid):
             valid_ids.append(cid)
-        except subprocess.CalledProcessError:
-            print(f"❌ No access to customer {cid}, skipping.")
-    return valid_ids
+        else:
+            invalid_ids.append(cid)
 
-valid_ids = filter_valid_customers(customer_ids)
+    print("\nSummary:")
+    print("✅ Accessible customer_ids:", valid_ids)
+    print("❌ Unauthorized customer_ids:", invalid_ids)
 
-# 3️⃣ Generate your PLX script dynamically
-start_date = (datetime.date.today() - datetime.timedelta(days=90)).strftime("%Y%m%d")
-end_date = datetime.date.today().strftime("%Y%m%d")
+    # Save valid IDs to a file for next step (main PLX query)
+    with open("/tmp/valid_customer_ids.txt", "w") as f:
+        for cid in valid_ids:
+            f.write(f"{cid}\n")
 
-plx_script = f"""
-SET queryrequest.accounting_group = 'toolsmarketplace-prod-cns-storage-owner';
-SET fl_instance = '/fl/query/prod';
-SET queryrequest.num_workers = 3000;
+    print("\nValid IDs saved to /tmp/valid_customer_ids.txt")
 
-DEFINE TABLE Campaigns (
-  FORMAT 'tangle',
-  QUERY FORMAT ('''
-    SELECT
-      Customer.external_customer_id AS external_customer_id,
-      Customer.currency_code AS currency_code,
-      Customer.customer_id AS internal_customer_id,
-      clicks,
-      impressions,
-      conversions,
-      conversion_value,
-      DayV2.day AS Day,
-      cost,
-      cost_usd
-    WHERE
-      DayV2.day >= {start_date}
-      AND DayV2.day <= {end_date}
-  '''),
-  ROOTIDS PROTOS = [{', '.join(f"'customer_id: {cid}'" for cid in valid_ids)}]
-);
-"""
 
-# 4️⃣ Run PLX script via CLI
-with open("daily_campaigns.plx", "w") as f:
-    f.write(plx_script)
-
-subprocess.run(["plxrun", "daily_campaigns.plx"], check=True)
-
-print("✅ Daily Tangle job executed successfully!")
+if __name__ == "__main__":
+    main()

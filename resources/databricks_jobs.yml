@@ -1,0 +1,13 @@
+resources:
+  jobs:
+    emissions_counting:
+      name: neso-emissions-counting-${bundle.target}
+      tasks:
+        - task_key: emissions_counting
+          spark_python_task:
+            python_file: ../jobs/run_model.py
+            parameters: [--model, emissions_counting, --env, ${bundle.target}]
+          new_cluster:
+            spark_version: "REPLACE_WITH_APPROVED_DBR"
+            node_type_id: "REPLACE_WITH_APPROVED_NODE_TYPE"
+            num_workers: 2

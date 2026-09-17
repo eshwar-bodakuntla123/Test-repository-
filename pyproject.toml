@@ -3,20 +3,18 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "neso-emissions"
+name = "neso-strategy-policy-framework"
 version = "0.1.0"
-description = "NESO Emissions Counting Python/PySpark framework"
+description = "Reusable Python/PySpark framework for NESO Strategy & Policy models"
 requires-python = ">=3.11,<3.12"
-dependencies = [
-    "pyspark>=3.5,<3.6",
-    "PyYAML>=6.0,<7.0",
-]
+dependencies = ["pyspark>=3.5,<3.6", "PyYAML>=6.0,<7.0"]
 
 [project.scripts]
-neso-emissions = "neso_emissions.cli:main"
+neso-model = "neso_model_framework.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["framework", "."]
+include = ["neso_model_framework*", "models*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

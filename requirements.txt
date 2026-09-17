@@ -1,2 +1,3 @@
+# Runtime baseline. Production PySpark must match the approved Databricks Runtime.
 pyspark>=3.5,<3.6
 PyYAML>=6.0,<7.0

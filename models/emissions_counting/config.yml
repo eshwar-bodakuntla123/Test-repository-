@@ -1,0 +1,4 @@
+model: emissions_counting
+version: "0.1"
+historical_start_year: 2021
+forecast_end_year: 2050

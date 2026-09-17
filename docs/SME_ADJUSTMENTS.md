@@ -1,5 +1,18 @@
 # SME Adjustments
 
-Store adjustments separately; never overwrite canonical source data. Minimum fields:
-model_run_id, scenario_id, business key, old_value, new_value, reason, adjusted_by, adjusted_at,
-adjustment_version and approval_status. Apply only approved adjustments.
+Never overwrite canonical source data to represent an SME intervention.
+
+Store an adjustment record containing at least:
+
+- model_run_id
+- scenario_id
+- business key
+- old_value
+- new_value
+- reason
+- adjusted_by
+- adjusted_at
+- adjustment_version
+- approval_status
+
+Only approved adjustments are applied to model calculations.

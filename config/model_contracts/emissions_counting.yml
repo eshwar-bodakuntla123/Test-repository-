@@ -1,0 +1,23 @@
+model: emissions_counting
+version: "0.1"
+
+required_input_columns:
+  - scenario_id
+  - sector
+  - geography
+  - year
+  - activity
+  - emission_factor
+
+output_columns:
+  - model_run_id
+  - scenario_id
+  - sector
+  - geography
+  - year
+  - metric
+  - unit
+  - value
+  - formula_version
+  - adjustment_version
+  - approval_status

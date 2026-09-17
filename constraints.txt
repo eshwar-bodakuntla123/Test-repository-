@@ -1,0 +1,2 @@
+# Populate exact, security-approved versions through the client's central dependency process.
+# PySpark version must match the approved Databricks Runtime.

@@ -1,25 +1,43 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68,<81", "wheel>=0.43,<1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "neso-strategy-policy-framework"
-version = "0.1.0"
+name = "neso-model-framework"
+version = "0.2.0"
 description = "Reusable Python/PySpark framework for NESO Strategy & Policy models"
 requires-python = ">=3.11,<3.12"
-dependencies = ["pyspark>=3.5,<3.6", "PyYAML>=6.0,<7.0"]
+dependencies = [
+    "pyspark>=3.5,<3.6",
+    "PyYAML>=6.0,<7.0",
+]
 
 [project.scripts]
 neso-model = "neso_model_framework.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["framework", "."]
-include = ["neso_model_framework*", "models*"]
+where = ["framework", "models"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = ["framework", "models"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ANN", "D"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

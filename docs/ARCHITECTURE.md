@@ -1,14 +1,60 @@
 # Architecture
 
-One reusable framework supports all 48 models. Model-specific business logic stays under `models/`.
+## Core boundary
 
 ```text
-React -> FastAPI -> Databricks Jobs -> framework -> model implementation -> existing NESO data platform
+Existing NESO Databricks / Medallion
+                |
+                v
+       framework/ingestion
+                |
+                v
+       framework/validation
+                |
+                v
+    model-specific transformations
+                |
+                v
+      SME-approved formulas
+                |
+                v
+          model results
+                |
+                v
+        reconciliation
+                |
+                v
+        output contract
 ```
 
-Bronze/Silver/Gold remains a platform concern. This repository consumes approved data interfaces.
+The application does not recreate Bronze/Silver/Gold.
 
-Framework responsibilities: configuration, ingestion, validation, transformations, adjustments,
-formula registry, reconciliation, outputs and orchestration.
+## One framework, many models
 
-Model responsibilities: formulas, transformations, modelling, model-specific validation, outputs and pipeline.
+```text
+framework/
+    common reusable capabilities
+    ingestion
+    validation
+    adjustments
+    formulas registry
+    reconciliation
+    outputs
+    orchestration
+
+models/
+    emissions_counting/
+    model_02/
+    ...
+    model_48/
+```
+
+## API/UI
+
+React is presentation only.
+
+FastAPI is an API/application boundary.
+
+Databricks Jobs run Spark workloads.
+
+Never run large Spark workloads inside FastAPI request workers.

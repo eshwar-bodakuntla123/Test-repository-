@@ -10,5 +10,8 @@ python -m pip install --upgrade pip
 pip install -r requirements-dev.txt
 pip install -e .
 
-pytest
-neso-emissions run --env dev
+ruff check framework models tests api
+ruff format --check framework models tests api
+pytest --cov=framework --cov=models --cov-fail-under=80
+
+neso-model run emissions_counting --env dev --local

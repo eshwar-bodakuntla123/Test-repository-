@@ -1,5 +1,22 @@
 # Formula Governance
 
-Excel/SME-approved logic is the source of truth during migration. Each formula must map from Excel
-reference to formula ID, implementation, regression test and SME approval. Do not invent missing logic.
-The sample activity-factor formula is a technical smoke test only.
+Excel is the reference implementation until SME sign-off.
+
+For each formula capture:
+
+- formula_id
+- business definition
+- Excel sheet/cell/range
+- source columns
+- input/output units
+- factors/lookups
+- assumptions
+- scenario behaviour
+- formula version
+- SME owner
+- approval status
+- regression test
+
+Do not invent missing business logic.
+
+The sample activity × factor rule in this repository is a technical smoke test only.

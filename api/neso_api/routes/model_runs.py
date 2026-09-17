@@ -1,43 +1,40 @@
-from __future__ import annotations
-
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/model-runs", tags=["model-runs"])
-
-_RUNS: dict[str, dict] = {}
+runs: dict[str, dict[str, str]] = {}
 
 
 class ModelRunRequest(BaseModel):
+    """Request to start a model run."""
+
     model: str = Field(default="emissions_counting")
-    environment: str = Field(default="dev")
+    environment: str = Field(default="prod")
     scenario_id: str = Field(default="BASE")
 
 
 @router.post("", status_code=202)
-def create_model_run(request: ModelRunRequest):
-    run_id = str(uuid4())
+def create_run(request: ModelRunRequest) -> dict[str, str]:
+    """Submit a model run.
 
-    _RUNS[run_id] = {
+    Production implementation should trigger the approved Databricks Job.
+    Spark must not execute inside FastAPI workers.
+    """
+    run_id = str(uuid4())
+    result = {
         "run_id": run_id,
         "model": request.model,
         "environment": request.environment,
         "scenario_id": request.scenario_id,
         "status": "SUBMITTED",
     }
-
-    # Integration point:
-    # trigger the approved Databricks Job here.
-    # Do not run Spark inside the FastAPI process.
-
-    return _RUNS[run_id]
+    runs[run_id] = result
+    return result
 
 
 @router.get("/{run_id}")
-def get_model_run(run_id: str):
-    if run_id not in _RUNS:
-        raise HTTPException(status_code=404, detail="Run not found")
-
-    return _RUNS[run_id]
+def get_run(run_id: str) -> dict[str, str]:
+    """Return model run status."""
+    return runs.get(run_id, {"run_id": run_id, "status": "NOT_FOUND"})

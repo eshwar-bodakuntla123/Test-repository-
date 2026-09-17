@@ -1,13 +1,16 @@
 bundle:
-  name: neso-emissions
+  name: neso-strategy-policy
 
 include:
   - resources/*.yml
 
 sync:
   include:
-    - src/**
+    - framework/**
+    - models/**
+    - jobs/**
     - config/**
+    - api/**
     - pyproject.toml
     - requirements.txt
     - README.md
@@ -16,6 +19,11 @@ targets:
   dev:
     mode: development
     default: true
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+
+  test:
+    mode: development
     workspace:
       root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
 

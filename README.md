@@ -93,3 +93,32 @@ abstraction. Never commit tokens, passwords, client credentials, connection stri
 
 Add a new model under `models/<model_name>/`; do not copy the framework.
 
+
+
+
+
+neso-strategy-policy/
+│
+├── framework/              ← COMMON, reusable across 48 models
+│   └── neso_model_framework/
+│
+├── models/                 ← BUSINESS LOGIC
+│   ├── emissions_counting/
+│   ├── model_02/
+│   ├── model_03/
+│   └── ...
+│
+├── jobs/                   ← Databricks execution
+├── config/                 ← Environment/model configuration
+├── resources/              ← Databricks resources
+├── api/                    ← FastAPI
+├── ui/                     ← React
+├── tests/                  ← Framework + model tests
+├── docs/                   ← Standards/governance
+├── scripts/
+│
+├── pyproject.toml
+├── requirements.txt
+├── requirements-dev.txt
+├── databricks.yml
+└── azure-pipelines.yml

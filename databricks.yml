@@ -1,0 +1,25 @@
+bundle:
+  name: neso-emissions
+
+include:
+  - resources/*.yml
+
+sync:
+  include:
+    - src/**
+    - config/**
+    - pyproject.toml
+    - requirements.txt
+    - README.md
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}

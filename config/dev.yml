@@ -1,0 +1,22 @@
+environment: dev
+
+model:
+  name: emissions_counting
+  start_year: 2021
+  end_year: 2050
+  default_geography: GB
+
+data:
+  input_table: neso_dev.emissions_silver.model_inputs
+  output_table: neso_dev.emissions_gold.emissions_counting
+  adjustment_table: neso_dev.emissions_silver.sme_adjustments
+
+dq:
+  fail_on_error: true
+  required_columns:
+    - scenario_id
+    - sector
+    - geography
+    - year
+    - activity
+    - emission_factor

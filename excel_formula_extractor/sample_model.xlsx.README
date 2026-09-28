@@ -1,0 +1,39 @@
+Create a workbook named sample_model.xlsx with:
+
+Sheet: Inputs
+A1 = Account
+B1 = Activity
+C1 = Quantity
+B5 = Electricity
+C5 = 100
+
+Sheet: Factors
+A1 = Factor
+B1 = Unit
+C1 = Emission Factor
+C10 = 0.82
+D1 = Other Factor
+D10 = 1.5
+
+Sheet: Parameters
+A1 = Parameter
+B1 = Some Parameter
+B4 = 1000
+
+Sheet: Embedded_Calculations
+A1 = Account
+B1 = Scope1
+C1 = Scope2
+D1 = Total
+E1 = Emissions
+
+B2 = =Inputs!B5*Factors!C10
+C2 = =Inputs!C5*Factors!D10
+D2 = =B2+C2
+E2 = =D2*Parameters!B4
+
+Then run:
+
+excel-formula-extractor sample_model.xlsx
+
+Expected formulas.csv will contain the original and resolved formulas.

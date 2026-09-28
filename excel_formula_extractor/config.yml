@@ -1,0 +1,25 @@
+# Excel formula extractor configuration.
+# Keep this file small. Add a sheet only when its header row differs
+# from the default.
+
+header_rows:
+  default: 1
+
+  # Examples:
+  # Inputs: 1
+  # Factors: 1
+  # Parameters: 1
+  # Embedded_Calculations: 1
+
+output:
+  formulas_file: formulas.csv
+  dependencies_file: dependencies.csv
+  issues_file: issues.csv
+
+options:
+  # Use sanitized names such as Emission_Factor instead of headers
+  # containing spaces or special characters.
+  sanitize_names: true
+
+  # Preserve unresolved references in the final formula and report them.
+  keep_unresolved: true
